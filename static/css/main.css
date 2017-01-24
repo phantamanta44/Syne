@@ -1,11 +1,17 @@
 body {
     font-family: "Ek-Mukta", sans-serif;
     text-align: center;
-    margin: 0;
+    margin: 0; padding: 0;
     background-color: #222;
     color: #ededed;
 }
 
 h1 {
     margin-top: 12%;
+}
+
+#vis {
+    width: 100vw; height: 100vh;
+    margin: 0; padding: 0;
+    background-color: #000000;
 }
