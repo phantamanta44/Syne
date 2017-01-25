@@ -81,7 +81,6 @@ $(document).ready(function() {
     function initVisualizer() {
         hueWidth = 360 / Config.bars;
         if (!Config.circle) {
-            barWidth = can.width / Config.bars;
             barWindowDelta = 6 / Config.bars;
         } else {
             barWidth = circ / Config.bars;
@@ -114,6 +113,7 @@ $(document).ready(function() {
         can.height = window.innerHeight;
         if (!Config.circle) {
             vis.clearRect(0, 0, can.width, can.height);
+            barWidth = can.width / Config.bars;
             for (let i = 0; i < Config.bars; i++) {
                 vis.fillStyle = "hsl(" + Math.floor(hueWidth * i) + ", 100%, 32%)";
                 let height = Math.max(yVal[i] * 500 * (1 + i * barWindowDelta), 2);
