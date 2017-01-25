@@ -34,10 +34,6 @@ $(document).ready(function() {
         srcNode = ac.createBufferSource();
         aNode = ac.createAnalyser();
         aNode.fftSize = 1024;
-        //sNode = ac.createScriptProcessor(2048, 1, 1);
-        /*sNode.onaudioprocess = function(e) {
-
-        };*/
         srcNode.connect(aNode);
         aNode.connect(ac.destination);
     }
@@ -111,17 +107,14 @@ $(document).ready(function() {
         aNode.getByteTimeDomainData(buf);
         buf = detrend(windowFunc.process(toFloats(buf)));
         fft.forward(buf);
-        let data = fft.spectrum.subarray(1, Math.floor(fft.spectrum.length / 3 + 1));
-        let secL = Math.floor(data.length / Config.bars);
+        let secL = Math.floor(fft.spectrum.length / Config.bars / 3);
+        let avg, j;
         for (let i = 0; i < Config.bars; i++) {
-            let avg = 0;
-            for (let j = secL * i; j < secL * (i + 1); j++)
-                avg += data[j];
+            avg = 0;
+            for (j = secL * i; j < secL * (i + 1); j++)
+                avg += fft.spectrum[j + 1];
             avg /= secL;
-            if (avg > yVal[i])
-                yVal[i] = avg;
-            else
-                yVal[i] *= 0.94;
+            yVal[i] = avg > yVal[i] ? avg : yVal[i] * 0.94;
         }
         can.width = window.innerWidth;
         can.height = window.innerHeight;
@@ -135,17 +128,19 @@ $(document).ready(function() {
                 vis.moveTo(0.5, hch - yVal[0] * 500 + 0.5);
                 vis.lineWidth = Config.lineWidth;
                 let i;
-                for (let i = 0; i < Config.bars; i++) {
-                    let height = yVal[i] * 500 * (1 + i * barWindowDelta);
+                for (i = 0; i < Config.bars; i++) {
                     points[i] = {
                         x: i * barWidth + 0.5,
-                        y: hch - height + 0.5
+                        y: hch - yVal[i] * 500 * (1 + i * barWindowDelta) + 0.5
                     };
                 }
                 for (i = 1; i < points.length - 2; i++) {
-                    let xC = (points[i].x + points[i + 1].x) / 2;
-                    let yC = (points[i].y + points[i + 1].y) / 2;
-                    vis.quadraticCurveTo(points[i].x, points[i].y, xC, yC);
+                    vis.quadraticCurveTo(
+                        points[i].x,
+                        points[i].y,
+                        (points[i].x + points[i + 1].x) / 2,
+                        (points[i].y + points[i + 1].y) / 2
+                    );
                 }
                 vis.quadraticCurveTo(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y);
                 vis.strokeStyle = Config.color;
@@ -165,8 +160,7 @@ $(document).ready(function() {
             if (Config.curve) {
                 let i;
                 for (i = 0; i < Config.bars; i++) {
-                    let height = yVal[i] * 150 * (1 + i * barWindowDelta);
-                    let newRad = Config.radius + height;
+                    let newRad = Config.radius + yVal[i] * 150 * (1 + i * barWindowDelta);
                     points[i] = {
                         x: newRad * Math.sin(deltaAngle * i),
                         y: newRad * -Math.cos(deltaAngle * i)
@@ -176,9 +170,12 @@ $(document).ready(function() {
                 vis.moveTo(points[0].x, points[0].y);
                 vis.lineWidth = Config.lineWidth;
                 for (i = 1; i < points.length - 1; i++) {
-                    let xC = (points[i].x + points[i + 1].x) / 2;
-                    let yC = (points[i].y + points[i + 1].y) / 2;
-                    vis.quadraticCurveTo(points[i].x, points[i].y, xC, yC);
+                    vis.quadraticCurveTo(
+                        points[i].x,
+                        points[i].y,
+                        (points[i].x + points[i + 1].x) / 2,
+                        (points[i].y + points[i + 1].y) / 2
+                    );
                 }
                 vis.quadraticCurveTo(points[i].x, points[i].y, points[0].x, points[0].y);
                 vis.strokeStyle = Config.color;
