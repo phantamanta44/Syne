@@ -60,18 +60,6 @@ $(document).ready(function() {
         req.send();
     }
 
-    const Config = {
-        bars: 80,
-        barMin: 2,
-        color: "#FFF",
-        rainbow: true,
-        circle: false,
-        radius: 100,
-        curve: false,
-        lineWidth: 2,
-        window: DSP.COSINE
-    };
-
     let q = {};
     if (!!document.location.search) {
         let parts = document.location.search.substring(1).split("&");
@@ -80,14 +68,18 @@ $(document).ready(function() {
             q[parts[i].substring(0, eq).toLowerCase()] = parts[i].substring(eq + 1);
         }
     }
-    Config.bars = "bars" in q ? parseInt(q["bars"], 10) : Config.bars;
-    Config.barMin = "barmin" in q ? parseInt(q["barmin"], 10) : Config.barMin;
-    Config.color = "color" in q ? "#" + q["color"] : Config.color;
-    Config.rainbow = "rainbow" in q ? q["rainbow"] == "true" : Config.rainbow;
-    Config.circle = "circle" in q ? q["circle"] == "true" : Config.circle;
-    Config.radius = "radius" in q ? parseInt(q["radius"], 10) : Config.radius;
-    Config.curve = "curve" in q ? q["curve"] == "true" : Config.curve;
-    Config.lineWidth = "lineWidth" in q ? parseInt(q["lineWidth"], 10) : Config.lineWidth;
+
+    const Config = {
+        bars: "bars" in q ? parseInt(q["bars"], 10) : 80,
+        barMin: "barmin" in q ? parseInt(q["barmin"], 10) : 2,
+        color: "color" in q ? "#" + q["color"] : "#FFF",
+        rainbow: "rainbow" in q ? q["rainbow"] == "true" : true,
+        circle: "circle" in q ? q["circle"] == "true" : false,
+        radius: "radius" in q ? parseInt(q["radius"], 10) : 100,
+        curve: "curve" in q ? q["curve"] == "true" : false,
+        lineWidth: "lineWidth" in q ? parseInt(q["lineWidth"], 10) : 2,
+        window: DSP.COSINE
+    };
 
     const can = document.getElementById("vis");
     const vis = can.getContext("2d");
