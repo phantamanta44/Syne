@@ -109,6 +109,15 @@ $(document).ready(function() {
     }
 
     prepareAudioNodes();
-    loadSound("test.mp3");
+
+    let q = {};
+    if (!!document.location.search) {
+        let parts = document.location.search.substring(1).split("&");
+        for (let i = 0; i < parts.length; i++) {
+            let entry = parts[i].split("=");
+            q[entry[0]] = entry[1];
+        }
+    }
+    loadSound(q.url || "test.mp3");
 
 });
