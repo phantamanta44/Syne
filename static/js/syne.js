@@ -1,5 +1,5 @@
 "use strict";
-$(document).ready(function() {
+$(document).ready(() => {
 
     if (!window.AudioContext) {
         if (!window.webkitAudioContext) {
@@ -48,11 +48,7 @@ $(document).ready(function() {
         let req = new XMLHttpRequest();
         req.open("GET", url, true);
         req.responseType = "arraybuffer";
-        req.onload = function() {
-            ac.decodeAudioData(req.response, function(buffer) {
-                playSound(buffer);
-            });
-        };
+        req.onload = () => ac.decodeAudioData(req.response, playSound);
         req.send();
     }
 
