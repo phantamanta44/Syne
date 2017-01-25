@@ -45,7 +45,7 @@ $(document).ready(function() {
     function playSound(buffer) {
         srcNode.buffer = buffer;
         srcNode.start(0);
-        updateBars();
+        initVisualizer();
     }
 
     function loadSound(url) {
@@ -64,6 +64,7 @@ $(document).ready(function() {
         bars: 80,
         color: "#FFF",
         circle: false,
+        radius: 100,
         useCurve: false,
         outline: true,
         window: DSP.COSINE
@@ -73,6 +74,23 @@ $(document).ready(function() {
     const vis = can.getContext("2d");
     const yVal = new Float32Array(Config.bars);
     const windowFunc = new WindowFunction(Config.window, 1);
+    const twoPi = Math.PI * 2;
+    const circ = Config.radius * twoPi;
+    let barWidth, hueWidth, barWindowDelta, hBarWidth, deltaAngle;
+
+    function initVisualizer() {
+        hueWidth = 360 / Config.bars;
+        if (!Config.circle) {
+            barWidth = can.width / Config.bars;
+            barWindowDelta = 6 / Config.bars;
+        } else {
+            barWidth = circ / Config.bars;
+            hBarWidth = barWidth / 2;
+            barWindowDelta = 12 / Config.bars;
+            deltaAngle = twoPi / Config.bars;
+        }
+        updateBars();
+    }
 
     function updateBars() {
         let buf = new Uint8Array(1024);
@@ -92,18 +110,24 @@ $(document).ready(function() {
             else
                 yVal[i] *= 0.94;
         }
-        vis.clearRect(0, 0, can.width, can.height);
+        can.width = window.innerWidth;
+        can.height = window.innerHeight;
         if (!Config.circle) {
-            let barWidth = can.width / Config.bars;
-            let hueWidth = 360 / Config.bars;
-            let barWindowDelta = 6 / Config.bars;
+            vis.clearRect(0, 0, can.width, can.height);
             for (let i = 0; i < Config.bars; i++) {
                 vis.fillStyle = "hsl(" + Math.floor(hueWidth * i) + ", 100%, 32%)";
                 let height = Math.max(yVal[i] * 500 * (1 + i * barWindowDelta), 2);
                 vis.fillRect(i * barWidth + 0.5, can.height / 2 - height / 2 + 0.5, barWidth, height);
             }
         } else {
-            // TODO Circle Config
+            vis.clearRect(-can.width / 2, -can.height / 2, can.width, can.height);
+            vis.translate(can.width / 2, can.height / 2);
+            for (let i = 0; i < Config.bars; i++) {
+                vis.fillStyle = "hsl(" + Math.floor(hueWidth * i) + ", 100%, 32%)";
+                let height = Math.max(yVal[i] * 150 * (1 + i * barWindowDelta), 2);
+                vis.fillRect(-hBarWidth, -Config.radius - height, barWidth, height);
+                vis.rotate(deltaAngle);
+            }
         }
         window.setTimeout(updateBars, 0);
     }
@@ -115,9 +139,10 @@ $(document).ready(function() {
         let parts = document.location.search.substring(1).split("&");
         for (let i = 0; i < parts.length; i++) {
             let eq = parts[i].indexOf("=");
-            q[parts[i].substring(0, eq)] = parts[i].substring(eq + 1);
+            q[parts[i].substring(0, eq).toLowerCase()] = parts[i].substring(eq + 1);
         }
     }
+    Config.circle = "circle" in q ? q["circle"] == "true" : false;
     loadSound(q.url || "test.mp3");
 
 });
