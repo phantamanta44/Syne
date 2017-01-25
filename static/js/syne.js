@@ -62,6 +62,7 @@ $(document).ready(function() {
 
     const Config = {
         bars: 80,
+        barMin: 2,
         color: "#FFF",
         rainbow: true,
         circle: false,
@@ -80,6 +81,7 @@ $(document).ready(function() {
         }
     }
     Config.bars = "bars" in q ? parseInt(q["bars"], 10) : Config.bars;
+    Config.barMin = "barmin" in q ? parseInt(q["barmin"], 10) : Config.barMin;
     Config.color = "color" in q ? "#" + q["color"] : Config.color;
     Config.rainbow = "rainbow" in q ? q["rainbow"] == "true" : Config.rainbow;
     Config.circle = "circle" in q ? q["circle"] == "true" : Config.circle;
@@ -129,7 +131,6 @@ $(document).ready(function() {
             else
                 yVal[i] *= 0.94;
         }
-        console.log(yVal.length);
         can.width = window.innerWidth;
         can.height = window.innerHeight;
         let hcw = can.width / 2;
@@ -139,11 +140,11 @@ $(document).ready(function() {
             barWidth = can.width / (Config.bars - 2);
             if (Config.curve) {
                 vis.beginPath();
-                vis.moveTo(0.5, hch - Math.max(yVal[0] * 500, 2) + 0.5);
+                vis.moveTo(0.5, hch - yVal[0] * 500 + 0.5);
                 vis.lineWidth = Config.lineWidth;
                 let i;
                 for (let i = 0; i < Config.bars; i++) {
-                    let height = Math.max(yVal[i] * 500 * (1 + i * barWindowDelta), 2);
+                    let height = yVal[i] * 500 * (1 + i * barWindowDelta);
                     points[i] = {
                         x: i * barWidth + 0.5,
                         y: hch - height + 0.5
@@ -162,7 +163,7 @@ $(document).ready(function() {
                 for (let i = 0; i < Config.bars; i++) {
                     if (Config.rainbow)
                         vis.fillStyle = "hsl(" + Math.floor(hueWidth * i) + ", 100%, 32%)";
-                    let height = Math.max(yVal[i] * 500 * (1 + i * barWindowDelta), 2);
+                    let height = Math.max(yVal[i] * 500 * (1 + i * barWindowDelta), Config.barMin);
                     vis.fillRect(i * barWidth + 0.5, hch - height / 2 + 0.5, barWidth, height);
                 }
             }
@@ -172,7 +173,7 @@ $(document).ready(function() {
             if (Config.curve) {
                 let i;
                 for (i = 0; i < Config.bars; i++) {
-                    let height = Math.max(yVal[i] * 150 * (1 + i * barWindowDelta), 2);
+                    let height = yVal[i] * 150 * (1 + i * barWindowDelta);
                     let newRad = Config.radius + height;
                     points[i] = {
                         x: newRad * Math.sin(deltaAngle * i),
@@ -195,7 +196,7 @@ $(document).ready(function() {
                 for (let i = 0; i < Config.bars; i++) {
                     if (Config.rainbow)
                         vis.fillStyle = "hsl(" + Math.floor(hueWidth * i) + ", 100%, 32%)";
-                    let height = Math.max(yVal[i] * 150 * (1 + i * barWindowDelta), 2);
+                    let height = Math.max(yVal[i] * 150 * (1 + i * barWindowDelta), Config.barMin);
                     vis.fillRect(-hBarWidth + 0.5, -Config.radius - height + 0.5, barWidth, height);
                     vis.rotate(deltaAngle);
                 }
